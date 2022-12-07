@@ -333,8 +333,7 @@
         string[] formulasDefinitions =  { };
         if (formulas == null)
         {
-        
-                formulasDefinitions = await _localStorage.GetItemAsync<string[]>("formulas");
+            formulasDefinitions = (await _localStorage.GetItemAsync<string[]>("formulas")) ?? new string[] { };
         }
         else
         {

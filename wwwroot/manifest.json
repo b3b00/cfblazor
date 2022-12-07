@@ -1,13 +1,14 @@
 {
-  "name": "Blazor Live Sync",
-  "short_name": "blazorLiveSync",
-  "start_url": "./",
+  "name": "Blazor on CloudFlare",
+  "short_name": "BlazorCloudFlare",
+  "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#03173d",
+  "theme_color": "#03173d",  
   "icons": [
     {
-      "src": "sync.png",
+      "src": "icon-192.png",
       "type": "image/png",
       "sizes": "256x256"
     }
