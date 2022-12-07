@@ -1,0 +1,88 @@
+@using LiveBlazorWasm.Data
+
+
+
+<li style="list-style: none;border: dotted 1px blue; margin: 10px">
+    @if (IsEditing)
+    {
+        <MatTextField @bind-value="@ItemDescription" 
+                      TValue="string" 
+                      label="@TodoItem.Description"  
+                      @onkeydown="@(async args => await OnKeyDown(args))"
+                      OnInput="@(e => ItemDescription = e.Value.ToString())"
+                      ></MatTextField>
+        <button role="image" aria-label="save" @onclick="@Update" style="color:green;border:none;background-color: white; width: 10%;display: inline" class="bi bi-check"/>
+        <button role="image" aria-label="cancel" @onclick="@CancelEdit" style="color:red;border:none;background-color: white;width: 10%;display: inline" class="bi bi-eject-fill"/>
+    }
+    else
+    {
+        <button role="image" aria-label="check" @onclick="@(() => OnDone.InvokeAsync(TodoItem))" style="border:none;background-color: white" class="bi @(TodoItem.Done ? "bi-check2-square" : "bi-app")"/>
+        <span style="@(GetStyle())">@(TodoItem.Description) </span>
+        <button role="image" aria-label="delete" @onclick="@(() => OnDelete.InvokeAsync(TodoItem))" style="color:red;border:none;background-color: white" class="bi bi-trash2-fill"/>
+        <button role="image" aria-label="edit" @onclick="@Edit" style="color:red;border:none;background-color: white" class="bi bi-pencil-fill"/>
+    }
+</li>
+
+@code {
+    
+    [Parameter]
+    public TodoItem TodoItem { get; set; }
+    
+    [Parameter]
+    public bool IsEditing { get; set; }
+    
+    public string ItemDescription { get; set; }
+
+    public void Edit()
+    {
+        IsEditing = true;
+        ItemDescription = TodoItem.Description;
+    }
+
+    public void CancelEdit()
+    {
+        IsEditing = false;
+    }
+
+    public async Task Update()
+    {
+        TodoItem.Description = ItemDescription;
+        await OnEdit.InvokeAsync(TodoItem);
+        IsEditing = false;
+    }
+    
+    private async Task OnKeyDown(KeyboardEventArgs args)
+    {
+        Console.WriteLine($"on key down : {args.Code}-{args.Key}");
+        if (args.Key == "Enter")
+        {
+            Console.WriteLine($"updating todo item {TodoItem} : {ItemDescription}");
+            await Update();
+        }
+        if (args.Key == "Escape")
+        {
+            this.IsEditing = false;
+        }
+    }
+    
+    [Parameter]
+    public EventCallback<TodoItem> OnDone  { get; set; }
+    
+    [Parameter]
+    public EventCallback<TodoItem> OnDelete  { get; set; }
+    
+    [Parameter]
+    public EventCallback<TodoItem> OnEdit { get; set; }
+
+    private string GetStyle()
+    {
+        if (TodoItem.Done)
+        {
+            return "text-decoration: line-through";
+        }
+        else
+        {
+            return "";
+        }
+    }
+}

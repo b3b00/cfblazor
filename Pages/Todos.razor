@@ -1,0 +1,153 @@
+@page "/todos"
+
+@using System.Linq;
+@using Microsoft.Extensions.Logging
+@inject Blazored.LocalStorage.ILocalStorageService _localStorage
+@inject IJSRuntime JsRuntime;
+@inject ILogger<Todos> _logger
+
+
+<h1>TODOS</h1>
+
+<MatSlideToggle Label="Show done tasks" TValue="bool" bind-Value="@ShowDone" ValueChanged="@ChangeShow"></MatSlideToggle>
+<ul>
+    @if (Loaded)
+    {
+
+        @if (ToDos != null)
+        {
+            @foreach (var todo in ToDos)
+            {
+                if (!todo.Done || (todo.Done && ShowDone))
+                {
+                    <Todo TodoItem="todo" OnDone="Toggle" OnDelete="Delete" OnEdit="Edit"/>
+                }
+            }
+        }
+        else
+        {
+            <p>nothing to do.</p>
+            <!-- TODO -->
+        }
+    }
+    else
+    {
+        <div id="app">Loading...<div class="spinner-border text-secondary" role="status">
+            <span class="sr-only" style="color:darkgray">Loading...</span>
+        </div></div>
+    }
+</ul>
+
+
+<div class="mb-5 row">    
+    <div class="col-sm-4">
+        <MatTextField @bind-value="Description" TValue="string" label="add a todo"  @onkeydown="@(async args => await OnKeyDown(args))"></MatTextField>  
+        @* <input type="text" class="form-control" id="inputTodo" @bind="Description" @bind:event="oninput" @onkeydown="OnKeyDown"> *@
+    </div>
+    <div class="col-sm-1">
+        <MatButton Icon="add" OnClick="@(async args => await AddItem())" label="Add"></MatButton>
+        @* <button type="button" class="btn btn-primary" @onclick="AddItem">Add</button> *@
+    </div>
+  </div>
+
+
+
+@code {
+
+    private bool Loaded = false;
+    
+    private List<TodoItem> ToDos;
+
+    private string Description;
+
+    private bool ShowDone;
+    
+    private bool isOnline;
+
+    private async Task Toggle(TodoItem todo)
+    {
+        todo.Done = !todo.Done;
+       
+            ToDos = ToDos.Select(x => x.Id == todo.Id ? todo : x).ToList();
+            await SaveToStorage();
+       
+    }
+    
+    
+    private async Task<bool> IsOnline()
+    {
+        isOnline = await JsRuntime.InvokeAsync<bool>("Connection.IsOnline", DotNetObjectReference.Create(this));
+        Console.WriteLine($"IsOnline() : {isOnline}");
+        return isOnline;
+    }  
+   
+    
+    private async Task OnKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await AddItem();
+        }
+    }
+
+    private void RefreshMe()
+    {
+       StateHasChanged();
+    }
+
+    private async Task AddItem()
+    {
+        _logger.LogInformation("adding todo " + (Description ?? "NULL"));
+        if (!string.IsNullOrEmpty(Description))
+        {
+
+            ToDos.Add(new TodoItem() { Description = Description, Done = false });
+            await SaveToStorage();
+        }
+    }
+
+    private async Task SaveToStorage()
+    {
+        await _localStorage.SetItemAsync("todos", ToDos);
+    }
+
+    private async Task Delete(TodoItem todo)
+    {
+        ToDos = ToDos.Where(x => x.Id != todo.Id).ToList();
+        await SaveToStorage();
+    }
+
+    private async Task Edit(TodoItem todo)
+    {
+        ToDos = ToDos.Select(x => x.Id == todo.Id ? todo : x).ToList();
+        await SaveToStorage();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var online = await IsOnline();
+        
+
+        _logger.LogDebug($"[1] loading todos from {(isOnline ? "network" : "storage")}");
+        Console.WriteLine($"[1] loading todos from {(isOnline ? "network" : "storage")}");
+
+        _logger.LogDebug("[2] loading todos form storage");
+        Console.WriteLine("[2] loading todos form storage");
+        ToDos = await _localStorage.GetItemAsync<List<TodoItem>>("todos");
+        if (ToDos == null)
+        {
+            ToDos = new List<TodoItem>();
+        }
+        _logger.LogDebug($"[3] found {(ToDos != null ? ToDos.Count : 0)} todos from storage");
+        Console.WriteLine($"[3] found {(ToDos != null ? ToDos.Count : 0)} todos from storage");
+        Loaded = true;
+    }
+
+
+    private void ChangeShow()
+    {
+        ShowDone = !ShowDone;
+        RefreshMe();
+    }
+
+}

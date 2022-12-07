@@ -1,0 +1,15 @@
+{
+  "name": "Blazor Live Sync",
+  "short_name": "blazorLiveSync",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#03173d",
+  "icons": [
+    {
+      "src": "sync.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    }
+  ]
+}
