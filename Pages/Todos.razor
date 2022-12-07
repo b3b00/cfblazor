@@ -100,8 +100,13 @@
         _logger.LogInformation("adding todo " + (Description ?? "NULL"));
         if (!string.IsNullOrEmpty(Description))
         {
-
-            ToDos.Add(new TodoItem() { Description = Description, Done = false });
+            int newId = 0;
+            if (ToDos.Any())
+            {
+                newId = ToDos.Select(x => x.Id).Max() + 1;
+            }
+            
+            ToDos.Add(new TodoItem() { Description = Description, Done = false, Id = newId});
             await SaveToStorage();
         }
     }
