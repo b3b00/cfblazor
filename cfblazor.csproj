@@ -1,23 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PublishTrimmed>true</PublishTrimmed>
+        <SelfContained>true</SelfContained>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-    <PackageReference Include="BlazorPro.BlazorSize" Version="6.1.2" />
-    <PackageReference Include="MatBlazor" Version="2.9.0-develop-042" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.11" PrivateAssets="all" />
-    <PackageReference Include="sly" Version="2.9.2.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <ServiceWorker Include="wwwroot\service-worker.js"
+                       PublishedContent="wwwroot\service-worker.published.js" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="dotnet-install.sh" />
-    <None Remove=".gitignore" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Blazored.LocalStorage" Version="4.3.0"/>
+        <PackageReference Include="BlazorPro.BlazorSize" Version="6.1.2"/>
+        <PackageReference Include="MatBlazor" Version="2.9.0-develop-042"/>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.11"/>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.11" PrivateAssets="all"/>
+        <PackageReference Include="sly" Version="2.9.2.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="dotnet-install.sh"/>
+        <None Remove=".gitignore"/>
+    </ItemGroup>
 
 </Project>
