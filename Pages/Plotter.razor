@@ -53,6 +53,10 @@
 <div>
     <MatSlideToggle Label="Show grid" TValue="bool" Value="@ShowGrid" ValueChanged="@ToggleGrid"></MatSlideToggle>
 
+    <MatTextField Label="zoom" TValue="int" @bind-value="@Zoom"></MatTextField>
+
+    <MatButton  OnClick="@(async args => await Redraw())" label="Zoom"></MatButton>
+    
     @if (Formulas != null && Formulas.Any())
     {
         <MatButton @onclick="DownloadSvg">Download image...</MatButton>
@@ -181,6 +185,11 @@
 
     protected async Task Redraw()
     {
+        if (Zoom <= 0)
+        {
+            Zoom = 10;
+        }
+        
         var formulasList = string.Join(", ", Formulas.Keys);
         Grid = "";
         Graphs = "";
@@ -192,7 +201,7 @@
         ColorIndex = 0;
         foreach (var formula in Formulas)
         {
-            await Draw(formula.Value.color, formula.Value.function, formula.Key);
+            await Draw(formula.Value.color, formula.Value.function, formula.Key, Zoom);
         }
     }
 
@@ -271,41 +280,45 @@
 
     private async Task DrawGrid()
     {
-        Referential range = new Referential(-10f, -6f, 10f, 6f);
+        
+        float toX = Zoom < 0 ? 10f : Zoom;
+        float toY = Zoom < 0 ? 6f : Zoom * 6f / 10f;
+        
+        Referential range = new Referential(-toX, -toY, toX, toY);
         Referential display = new Referential(0, 0, Width, Height);
 
-        var ordinateBottom = range.TranslateTo(0, -6, display);
-        var ordinateTop = range.TranslateTo(0, 6, display);
-        var abscissaLeft = range.TranslateTo(-10, 0, display);
-        var abscissaRight = range.TranslateTo(10, 0, display);
+        var ordinateBottom = range.TranslateTo(0, -toY, display);
+        var ordinateTop = range.TranslateTo(0, toY, display);
+        var abscissaLeft = range.TranslateTo(-toX, 0, display);
+        var abscissaRight = range.TranslateTo(toX, 0, display);
 
         Grid += SvgLine(ordinateBottom, ordinateTop, "black");
         Grid += SvgLine(abscissaLeft, abscissaRight, color: "black");
 
-        for (double x = range.FromX + 1; x < range.ToX; x++)
+        for (double x = range.FromX + 1; x < range.ToX; x+=range.ToX/10f)
         {
             if (x == 0.0)
             {
                 continue;
             }
-            var vertB = range.TranslateTo(x, -6, display);
-            var vertT = range.TranslateTo(x, 6, display);
+            var vertB = range.TranslateTo(x, -toY, display);
+            var vertT = range.TranslateTo(x, toY, display);
             Grid += SvgLine(vertB, vertT, "lightgray", "5 , 15");
         }
 
-        for (double y = range.FromY + 1; y < range.ToY; y++)
+        for (double y = range.FromY + 1; y < range.ToY; y+=range.ToY/6f)
         {
             if (y == 0.0)
             {
                 continue;
             }
-            var horizL = range.TranslateTo(-10, y, display);
-            var horizR = range.TranslateTo(10, y, display);
+            var horizL = range.TranslateTo(-toX, y, display);
+            var horizR = range.TranslateTo(toX, y, display);
             Grid += SvgLine(horizL, horizR, "lightgray", "5, 15");
         }
     }
 
-    protected async Task Draw(string color, Func<double, double?> function, string formula)
+    protected async Task Draw(string color, Func<double, double?> function, string formula, int zoom=-1)
     {
         var formulaGraph = new StringBuilder();
 
@@ -316,7 +329,7 @@
         },
             async (double x1, double y1, double x2, double y2) => { formulaGraph.AppendLine(SvgLine(x1, y1, x2, y2, color)); });
 
-        await svgPlotter.Draw(function, Width, Height);
+        await svgPlotter.Draw(function, Width, Height, zoom);
 
         Graphs += "\n" + formulaGraph.ToString();
     }
@@ -439,5 +452,9 @@
     {
         return SvgText(position.X, position.Y, text, color, size);
     }
+
+
+
+    public int Zoom { get; set; } = 10;
 
 }
