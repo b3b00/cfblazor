@@ -54,3 +54,25 @@ async function onFetch(event) {
 
     return cachedResponse || fetch(event.request);
 }
+
+
+function fetchAndCache(url) {
+    return fetch(url)
+        .then(function(response) {
+            // Check if we received a valid response
+            if (!response.ok) {
+                throw Error(response.statusText);
+            }
+            return caches.open(CACHE_NAME)
+                .then(function(cache) {
+                    cache.put(url, response.clone());
+                    return response;
+                });
+        })
+        .catch(function(error) {
+            console.log('Request failed:', url, error);
+            console.log('redirect to /');
+            return(Response.redirect('/'));
+            // You could return a custom offline 404 page here
+        });
+}

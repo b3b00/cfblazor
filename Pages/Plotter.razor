@@ -27,11 +27,11 @@
 </div>
 
 <MatSnackbar @bind-IsOpen="@snackOpened" Leading="true">
-            <MatSnackbarContent>@snackMessage.</MatSnackbarContent>
-            <MatSnackbarActions>
-                <MatButton Raised="true" OnClick="@(() => { snackOpened = false;})">OK</MatButton>
-            </MatSnackbarActions>
-        </MatSnackbar>
+    <MatSnackbarContent>@snackMessage.</MatSnackbarContent>
+    <MatSnackbarActions>
+        <MatButton Raised="true" OnClick="@(() => { snackOpened = false; })">OK</MatButton>
+    </MatSnackbarActions>
+</MatSnackbar>
 
 <div style="display:flex;flex-direction: row;flex-wrap: wrap">
     <div >
@@ -49,14 +49,11 @@
         }
     </div>
 </div>
-
 <div>
-    <MatSlideToggle Label="Show grid" TValue="bool" Value="@ShowGrid" ValueChanged="@ToggleGrid"></MatSlideToggle>
 
-    <MatTextField Label="zoom" TValue="int" @bind-value="@Zoom"></MatTextField>
+        <MatSlideToggle Label="Show grid" TValue="bool" Value="@ShowGrid" ValueChanged="@ToggleGrid"></MatSlideToggle>
 
-    <MatButton  OnClick="@(async args => await Redraw())" label="Zoom"></MatButton>
-    
+        <MatSlider TValue="int" ValueMin="0" ValueMax="200" ValueChanged="@(async args => { Zoom = args; await Redraw(); })"></MatSlider>
     @if (Formulas != null && Formulas.Any())
     {
         <MatButton @onclick="DownloadSvg">Download image...</MatButton>
@@ -94,6 +91,9 @@
     private bool ShowGrid = true;
 
     private int ColorIndex = 0;
+    
+    public int Zoom { get; set; } = 10;
+    public int SlideZoom { get; set; } = 10;
 
     private static string[] Colors = new[]
     {
@@ -231,7 +231,7 @@
 
         await IsOnline();
         
-        StateHasChanged();
+        //StateHasChanged();
     }
 
     private async Task DownloadSvg()
@@ -455,6 +455,6 @@
 
 
 
-    public int Zoom { get; set; } = 10;
+    
 
 }
