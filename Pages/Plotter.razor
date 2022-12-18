@@ -53,7 +53,7 @@
 
         <MatSlideToggle Label="Show grid" TValue="bool" Value="@ShowGrid" ValueChanged="@ToggleGrid"></MatSlideToggle>
 
-        <MatSlider TValue="int" ValueMin="0" ValueMax="200" ValueChanged="@(async args => { Zoom = args; await Redraw(); })"></MatSlider>
+        <MatSlider TValue="double" ValueMin="0" Value="@Zoom" ValueMax="200" ValueChanged="@(async args => { Zoom = args; await Redraw(); })" Id="Zoomy"></MatSlider>
     @if (Formulas != null && Formulas.Any())
     {
         <MatButton @onclick="DownloadSvg">Download image...</MatButton>
@@ -92,9 +92,20 @@
 
     private int ColorIndex = 0;
     
-    public int Zoom { get; set; } = 10;
-    public int SlideZoom { get; set; } = 10;
+    public double Zoom { get; set; } = 100;
 
+    public double OtherZoom
+    {
+        get
+        {
+            if (Zoom < 100)
+            {
+                return Zoom / 10;
+            }
+            return Zoom;
+        }
+    }
+    
     private static string[] Colors = new[]
     {
         "blue",
@@ -185,9 +196,10 @@
 
     protected async Task Redraw()
     {
+        Console.WriteLine($"Zoom = {Zoom} => {OtherZoom}");
         if (Zoom <= 0)
         {
-            Zoom = 10;
+            Zoom = 100;
         }
         
         var formulasList = string.Join(", ", Formulas.Keys);
@@ -201,7 +213,7 @@
         ColorIndex = 0;
         foreach (var formula in Formulas)
         {
-            await Draw(formula.Value.color, formula.Value.function, formula.Key, Zoom);
+            await Draw(formula.Value.color, formula.Value.function, formula.Key, OtherZoom);
         }
     }
 
@@ -230,8 +242,6 @@
         await base.OnInitializedAsync();
 
         await IsOnline();
-        
-        //StateHasChanged();
     }
 
     private async Task DownloadSvg()
@@ -281,8 +291,8 @@
     private async Task DrawGrid()
     {
         
-        float toX = Zoom < 0 ? 10f : Zoom;
-        float toY = Zoom < 0 ? 6f : Zoom * 6f / 10f;
+        double toX = OtherZoom < 0 ? 10d : OtherZoom;
+        double toY = OtherZoom < 0 ? 6d : OtherZoom * 6d / 10d;
         
         Referential range = new Referential(-toX, -toY, toX, toY);
         Referential display = new Referential(0, 0, Width, Height);
@@ -318,7 +328,7 @@
         }
     }
 
-    protected async Task Draw(string color, Func<double, double?> function, string formula, int zoom=-1)
+    protected async Task Draw(string color, Func<double, double?> function, string formula, double zoom=-1)
     {
         var formulaGraph = new StringBuilder();
 

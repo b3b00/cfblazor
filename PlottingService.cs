@@ -16,10 +16,10 @@ namespace LiveBlazorWasm.Client
             MoveTo = moveTo;
         }
         
-        public async Task Draw(Func<double, double?> function, long width, long height, int zoom = -1)
+        public async Task Draw(Func<double, double?> function, long width, long height, double zoom = -1)
         {
-            float toX = zoom < 0 ? 10f : zoom;
-            float toy = zoom < 0 ? 6f : zoom * 6f / 10f;
+            double toX = zoom < 0 ? 10d : zoom;
+            double toy = zoom < 0 ? 6d: zoom * 6d / 10d;
                 
                 Referential range = new Referential(-toX, -toy, toX, toy);
                 Referential display = new Referential(0, 0, width, height);

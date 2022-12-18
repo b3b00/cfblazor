@@ -44,7 +44,7 @@ namespace LiveBlazorWasm.Client
             };
         }
 
-        public Referential(float fromX, float fromY, float toX, float toY)
+        public Referential(double fromX, double fromY, double toX, double toY)
         {
             FromX = fromX;
             ToX = toX;
