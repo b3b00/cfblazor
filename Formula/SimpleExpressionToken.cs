@@ -7,11 +7,11 @@ namespace LiveBlazorWasm.Client.Formula
         // float number 
         [Lexeme(GenericToken.Double)] DOUBLE = 1,
 
-         // integer        
+        // integer        
         [Lexeme(GenericToken.Int)] INT = 3,
 
         [Lexeme(GenericToken.Identifier)] IDENTIFIER = 4,
-        
+
         // the + operator
         [Lexeme(GenericToken.SugarToken, "+")] PLUS = 5,
 
@@ -33,14 +33,12 @@ namespace LiveBlazorWasm.Client.Formula
 
         // a right paranthesis )
         [Lexeme(GenericToken.SugarToken, ")")] RPAREN = 11,
-        
-        [Sugar(",")]COMMA=12,
+
+        [Sugar(",")] COMMA = 12,
         // a variable
-        
-        [Sugar("^")]
-  [Sugar("**")] 
- EXP=13,
-        
+
+        [Sugar("^")] [Sugar("**")] EXP = 13,
+
         [Keyword("sin")]
         [Keyword("cos")]
         [Keyword("tan")]
@@ -49,7 +47,5 @@ namespace LiveBlazorWasm.Client.Formula
         [Keyword("sqrt")]
         [Keyword("abs")]
         FUNCTION = 14
-        
-        
     }
 }

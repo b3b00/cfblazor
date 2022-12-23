@@ -92,8 +92,34 @@
 
     private int ColorIndex = 0;
     
-    public int Zoom { get; set; } = 10;
-    public int SlideZoom { get; set; } = 10;
+    private double _zoom = 100d;
+
+    public double Zoom
+    {
+        get
+        {
+            return _zoom; 
+            
+        }
+        set
+        {
+            _zoom = value;
+        }
+    }
+
+
+
+    public double OtherZoom
+    {
+        get
+        {
+            if (Zoom < 100)
+            {
+                return Zoom / 10;
+            }
+            return Zoom;
+        }
+    }
 
     private static string[] Colors = new[]
     {
@@ -107,6 +133,8 @@
         "black",
         "deeppink"
     };
+    
+
 
     private async Task Clear()
     {
@@ -151,12 +179,15 @@
                         var context = new ExpressionContext(new Dictionary<string, double>() { { "x", x } });
                         return ast.Result.Evaluate(context);
                     };
-
-                    ColorIndex = ColorIndex > Colors.Length - 1 ? 0 : ColorIndex;
+                    
                     Formulas[Formula] = (function,Colors[ColorIndex]);
+                    Console.WriteLine($"painting #{ColorIndex} : {Colors[ColorIndex]}");
                     await SaveFormulas();
-                    await Draw(Colors[ColorIndex], function, Formula);
+                    await Redraw();
+                    //await Draw(Colors[ColorIndex], function, Formula);
+                    Console.WriteLine($"{ColorIndex} >= {Colors.Length - 1} ? 0 : {ColorIndex + 1}");
                     ColorIndex = ColorIndex >= Colors.Length - 1 ? 0 : ColorIndex + 1;
+                    Console.WriteLine($"next index : >{ColorIndex}< ");
                 }
                 else
                 {
@@ -172,7 +203,7 @@
             snackMessage = e.Message;
             snackOpened = true;
         }
-        StateHasChanged();
+        // StateHasChanged();
     }
 
     private async Task OnKeyDown(KeyboardEventArgs args)
@@ -198,10 +229,9 @@
         {
             await DrawGrid();
         }
-        ColorIndex = 0;
         foreach (var formula in Formulas)
         {
-            await Draw(formula.Value.color, formula.Value.function, formula.Key, Zoom);
+            await Draw(formula.Value.color, formula.Value.function, formula.Key, OtherZoom);
         }
     }
 
@@ -281,8 +311,8 @@
     private async Task DrawGrid()
     {
         
-        float toX = Zoom < 0 ? 10f : Zoom;
-        float toY = Zoom < 0 ? 6f : Zoom * 6f / 10f;
+        double toX = Zoom < 0 ? 10f : Zoom;
+        double toY = Zoom < 0 ? 6f : Zoom * 6f / 10f;
         
         Referential range = new Referential(-toX, -toY, toX, toY);
         Referential display = new Referential(0, 0, Width, Height);
@@ -318,7 +348,7 @@
         }
     }
 
-    protected async Task Draw(string color, Func<double, double?> function, string formula, int zoom=-1)
+    protected async Task Draw(string color, Func<double, double?> function, string formula, double zoom=-1)
     {
         var formulaGraph = new StringBuilder();
 
@@ -329,7 +359,7 @@
         },
             async (double x1, double y1, double x2, double y2) => { formulaGraph.AppendLine(SvgLine(x1, y1, x2, y2, color)); });
 
-        await svgPlotter.Draw(function, Width, Height, zoom);
+        await svgPlotter.Draw( function, Width, Height, zoom);
 
         Graphs += "\n" + formulaGraph.ToString();
     }
