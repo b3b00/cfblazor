@@ -37,7 +37,9 @@ namespace LiveBlazorWasm.Client.Formula
         [Sugar(",")]COMMA=12,
         // a variable
         
-        [Sugar("^")] EXP=13,
+        [Sugar("^")]
+  [Sugar("**")] 
+ EXP=13,
         
         [Keyword("sin")]
         [Keyword("cos")]
